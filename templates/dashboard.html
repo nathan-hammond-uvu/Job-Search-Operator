@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Job Search Agent{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h2>Dashboard</h2>
+    <p>Welcome back! Here's your job search overview.</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>{{ pending_count }}</h3>
+        <p>Jobs Pending Review</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ approved_count }}</h3>
+        <p>Approved Jobs</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ need_to_apply_count }}</h3>
+        <p>Need to Apply</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ waiting_count }}</h3>
+        <p>Waiting for Response</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ interview_count }}</h3>
+        <p>Interviews Requested</p>
+    </div>
+</div>
+
+<!-- What to do today -->
+<div class="card">
+    <h3 style="margin-bottom: 15px;">📋 What should I do today?</h3>
+    <ul style="list-style: none; padding: 0;">
+        {% if pending_count > 0 %}
+        <li style="padding: 10px; background: #ffeaa7; border-radius: 5px; margin-bottom: 10px;">
+            ✓ Review <strong>{{ pending_count }}</strong> pending job{{ 's' if pending_count != 1 else '' }}
+            <a href="{{ url_for('jobs.pending') }}" class="btn btn-primary btn-small" style="float: right;">Review Now</a>
+        </li>
+        {% endif %}
+        {% if need_to_apply_count > 0 %}
+        <li style="padding: 10px; background: #74b9ff; border-radius: 5px; margin-bottom: 10px;">
+            ✓ Apply to <strong>{{ need_to_apply_count }}</strong> approved job{{ 's' if need_to_apply_count != 1 else '' }}
+            <a href="{{ url_for('applications.index') }}" class="btn btn-primary btn-small" style="float: right;">View Applications</a>
+        </li>
+        {% endif %}
+        {% if waiting_count > 0 %}
+        <li style="padding: 10px; background: #dfe6e9; border-radius: 5px; margin-bottom: 10px;">
+            ✓ Check status of <strong>{{ waiting_count }}</strong> pending application{{ 's' if waiting_count != 1 else '' }}
+        </li>
+        {% endif %}
+        {% if pending_count == 0 and need_to_apply_count == 0 and waiting_count == 0 %}
+        <li style="padding: 10px; background: #55efc4; border-radius: 5px;">
+            ✓ You're all caught up! 🎉
+        </li>
+        {% endif %}
+    </ul>
+</div>
+
+<!-- Recent Pending Jobs -->
+{% if recent_pending %}
+<div class="card">
+    <h3 style="margin-bottom: 20px;">Recent Jobs Pending Review</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Company</th>
+                <th>Location</th>
+                <th>Fit Score</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in recent_pending %}
+            <tr>
+                <td><a href="{{ url_for('jobs.detail', job_id=job.id) }}">{{ job.title }}</a></td>
+                <td>{{ job.company }}</td>
+                <td>{{ job.location or 'N/A' }}</td>
+                <td>
+                    {% if job.fit_score %}
+                        {% if job.fit_score >= 0.7 %}
+                            <span class="badge badge-high">{{ "%.0f"|format(job.fit_score * 100) }}%</span>
+                        {% elif job.fit_score >= 0.5 %}
+                            <span class="badge badge-medium">{{ "%.0f"|format(job.fit_score * 100) }}%</span>
+                        {% else %}
+                            <span class="badge badge-low">{{ "%.0f"|format(job.fit_score * 100) }}%</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge badge-low">N/A</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('jobs.approve', job_id=job.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-success btn-small">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('jobs.deny', job_id=job.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-secondary btn-small">Deny</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p style="margin-top: 15px;"><a href="{{ url_for('jobs.pending') }}">View all pending jobs →</a></p>
+</div>
+{% endif %}
+{% endblock %}

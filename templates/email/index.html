@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Email Scanner - Job Search Agent{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h2>Email Scanner</h2>
+    <p>Scan your inbox for recruiter responses and auto-replies.</p>
+    {% if not scanning_enabled %}
+    <p style="color: #e74c3c; margin-top: 10px;">⚠️ Email scanning is currently disabled. Enable it in configuration.</p>
+    {% endif %}
+</div>
+
+{% if scanning_enabled %}
+<div class="card">
+    <form method="POST" action="{{ url_for('email.scan') }}">
+        <button type="submit" class="btn btn-primary">Scan for New Emails</button>
+    </form>
+</div>
+{% endif %}
+
+{% if messages %}
+<div class="card">
+    <h3>Recent Messages</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>From</th>
+                <th>Subject</th>
+                <th>Received</th>
+                <th>Classification</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for msg in messages %}
+            <tr>
+                <td>{{ msg.sender[:50] }}</td>
+                <td>{{ msg.subject[:60] }}</td>
+                <td>{{ msg.received_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if msg.is_auto_reply %}<span class="badge badge-secondary">Auto-Reply</span>{% endif %}
+                    {% if msg.is_recruiter_response %}<span class="badge badge-primary">Recruiter</span>{% endif %}
+                    {% if msg.suggested_status %}
+                        <br><span class="badge badge-info">Suggests: {{ msg.suggested_status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if msg.suggested_status and msg.application_id %}
+                    <form method="POST" action="{{ url_for('email.apply_suggestion', msg_id=msg.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-success btn-small">Apply Suggestion</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-state-icon">📧</div>
+        <h3>No Email Messages</h3>
+        <p>{% if scanning_enabled %}Scan your inbox to see messages here.{% else %}Enable email scanning in configuration.{% endif %}</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

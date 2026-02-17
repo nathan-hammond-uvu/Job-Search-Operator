@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Application - {{ application.job.title }}{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h2>Application: {{ application.job.title }}</h2>
+    <p>{{ application.job.company }} • {{ application.job.location or 'Location not specified' }}</p>
+</div>
+
+<div class="card">
+    <h3>Application Status</h3>
+    <form method="POST" action="{{ url_for('applications.update_status', app_id=application.id) }}">
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select name="status" id="status" onchange="this.form.submit()">
+                {% for status in ['NEED_TO_APPLY', 'APPLIED', 'WAITING_FOR_RESPONSE', 'INTERVIEW_REQUESTED', 'DENIED', 'OFFER_SENT'] %}
+                <option value="{{ status }}" {% if application.status.value == status %}selected{% endif %}>
+                    {{ status.replace('_', ' ').title() }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+    
+    <p><strong>Created:</strong> {{ application.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p><strong>Last Updated:</strong> {{ application.updated_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    {% if application.applied_at %}
+    <p><strong>Applied:</strong> {{ application.applied_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3>Notes</h3>
+    <form method="POST" action="{{ url_for('applications.update_notes', app_id=application.id) }}">
+        <div class="form-group">
+            <textarea name="notes" rows="6" placeholder="Add notes about this application...">{{ application.notes or '' }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Notes</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Actions</h3>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ url_for('documents.list_documents', job_id=application.job_id) }}" class="btn btn-primary">📄 View Documents</a>
+        <a href="{{ url_for('jobs.detail', job_id=application.job_id) }}" class="btn btn-secondary">View Job Details</a>
+        <a href="{{ application.job.url }}" target="_blank" class="btn btn-secondary">Original Posting</a>
+    </div>
+</div>
+{% endblock %}

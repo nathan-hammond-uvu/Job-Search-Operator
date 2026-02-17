@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} - Job Search Agent{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h2>{{ job.title }}</h2>
+    <p><strong>{{ job.company }}</strong> • {{ job.location or 'Location not specified' }}</p>
+    {% if job.salary %}<p>Salary: {{ job.salary }}</p>{% endif %}
+</div>
+
+<div class="card">
+    <h3>Job Details</h3>
+    <p><strong>Status:</strong> <span class="badge badge-{{ job.status.value.lower() }}">{{ job.status.value }}</span></p>
+    <p><strong>Discovered:</strong> {{ job.discovered_at.strftime('%Y-%m-%d %H:%M') }}</p>
+    {% if job.fit_score %}
+    <p><strong>Fit Score:</strong>
+        {% if job.fit_score >= 0.7 %}
+            <span class="badge badge-high">{{ "%.0f"|format(job.fit_score * 100) }}%</span>
+        {% elif job.fit_score >= 0.5 %}
+            <span class="badge badge-medium">{{ "%.0f"|format(job.fit_score * 100) }}%</span>
+        {% else %}
+            <span class="badge badge-low">{{ "%.0f"|format(job.fit_score * 100) }}%</span>
+        {% endif %}
+    </p>
+    {% endif %}
+    <p><strong>URL:</strong> <a href="{{ job.url }}" target="_blank">{{ job.url }}</a></p>
+</div>
+
+{% if job.summary %}
+<div class="card">
+    <h3>AI Summary</h3>
+    <p>{{ job.summary }}</p>
+</div>
+{% endif %}
+
+{% if job.description %}
+<div class="card">
+    <h3>Description</h3>
+    <p style="white-space: pre-wrap;">{{ job.description }}</p>
+</div>
+{% endif %}
+
+{% if job.requirements %}
+<div class="card">
+    <h3>Requirements</h3>
+    <p style="white-space: pre-wrap;">{{ job.requirements }}</p>
+</div>
+{% endif %}
+
+<div class="card">
+    <h3>Actions</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        {% if job.status.value == 'PENDING_REVIEW' %}
+            <form method="POST" action="{{ url_for('jobs.approve', job_id=job.id) }}">
+                <button type="submit" class="btn btn-success">✓ Approve</button>
+            </form>
+            <form method="POST" action="{{ url_for('jobs.deny', job_id=job.id) }}">
+                <button type="submit" class="btn btn-secondary">✗ Deny</button>
+            </form>
+        {% elif job.status.value == 'APPROVED' %}
+            <a href="{{ url_for('documents.list_documents', job_id=job.id) }}" class="btn btn-primary">📄 Manage Documents</a>
+            {% if job.application %}
+                <a href="{{ url_for('applications.detail', app_id=job.application.id) }}" class="btn btn-success">View Application</a>
+            {% endif %}
+        {% elif job.status.value == 'RECYCLE_BIN' %}
+            <form method="POST" action="{{ url_for('jobs.restore', job_id=job.id) }}">
+                <button type="submit" class="btn btn-success">Restore</button>
+            </form>
+            <form method="POST" action="{{ url_for('jobs.delete', job_id=job.id) }}" data-confirm="Permanently delete this job? This cannot be undone.">
+                <button type="submit" class="btn btn-danger">Delete Permanently</button>
+            </form>
+        {% endif %}
+        <a href="{{ job.url }}" target="_blank" class="btn btn-primary">View Original Posting</a>
+    </div>
+</div>
+{% endblock %}

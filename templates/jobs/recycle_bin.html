@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Recycle Bin - Job Search Agent{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h2>Recycle Bin</h2>
+    <p>Jobs here will be automatically deleted after 7 days.</p>
+</div>
+
+{% if jobs %}
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Company</th>
+                <th>Moved to Recycle</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <td>{{ job.title }}</td>
+                <td>{{ job.company }}</td>
+                <td>{{ job.moved_to_recycle_at.strftime('%Y-%m-%d') if job.moved_to_recycle_at else 'N/A' }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('jobs.restore', job_id=job.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-success btn-small">Restore</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('jobs.delete', job_id=job.id) }}" style="display: inline;" data-confirm="Permanently delete this job? This cannot be undone.">
+                        <button type="submit" class="btn btn-danger btn-small">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-state-icon">🗑️</div>
+        <h3>Recycle Bin is Empty</h3>
+        <p>Denied jobs will appear here.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

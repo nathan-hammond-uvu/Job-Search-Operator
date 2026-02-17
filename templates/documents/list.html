@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Documents - {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h2>Documents for {{ job.title }}</h2>
+    <p>{{ job.company }}</p>
+</div>
+
+<div class="card">
+    <h3>Generate Documents</h3>
+    <div style="display: flex; gap: 10px;">
+        <form method="POST" action="{{ url_for('documents.generate', job_id=job.id, doc_type='resume') }}">
+            <button type="submit" class="btn btn-primary">Generate Resume</button>
+        </form>
+        <form method="POST" action="{{ url_for('documents.generate', job_id=job.id, doc_type='cover_letter') }}">
+            <button type="submit" class="btn btn-primary">Generate Cover Letter</button>
+        </form>
+    </div>
+</div>
+
+{% if documents %}
+<div class="card">
+    <h3>Generated Documents</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td>{{ doc.document_type.value.replace('_', ' ').title() }}</td>
+                <td>{{ doc.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('documents.view', doc_id=doc.id) }}" class="btn btn-primary btn-small">Preview</a>
+                    <a href="{{ url_for('documents.export', doc_id=doc.id) }}" class="btn btn-secondary btn-small">Download HTML</a>
+                    <form method="POST" action="{{ url_for('documents.regenerate', doc_id=doc.id) }}" style="display: inline;" data-confirm="Regenerate this document? The current version will be deleted.">
+                        <button type="submit" class="btn btn-secondary btn-small">Regenerate</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-state-icon">📄</div>
+        <h3>No Documents Generated</h3>
+        <p>Generate a resume or cover letter to get started.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

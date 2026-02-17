@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Pending Review - Job Search Agent{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h2>Jobs Pending Review</h2>
+    <p>Review and approve or deny these job opportunities.</p>
+</div>
+
+{% if jobs %}
+    {% for job in jobs %}
+    <div class="card">
+        <h3 style="margin-bottom: 10px;">
+            <a href="{{ url_for('jobs.detail', job_id=job.id) }}" style="color: #2c3e50; text-decoration: none;">
+                {{ job.title }}
+            </a>
+        </h3>
+        <p style="color: #7f8c8d; margin-bottom: 10px;">
+            <strong>{{ job.company }}</strong> • {{ job.location or 'Location not specified' }}
+            {% if job.salary %} • {{ job.salary }}{% endif %}
+        </p>
+        
+        {% if job.fit_score %}
+        <p style="margin-bottom: 10px;">
+            Fit Score:
+            {% if job.fit_score >= 0.7 %}
+                <span class="badge badge-high">{{ "%.0f"|format(job.fit_score * 100) }}%</span>
+            {% elif job.fit_score >= 0.5 %}
+                <span class="badge badge-medium">{{ "%.0f"|format(job.fit_score * 100) }}%</span>
+            {% else %}
+                <span class="badge badge-low">{{ "%.0f"|format(job.fit_score * 100) }}%</span>
+            {% endif %}
+        </p>
+        {% endif %}
+        
+        {% if job.summary %}
+        <p style="margin-bottom: 15px; color: #555;">{{ job.summary }}</p>
+        {% endif %}
+        
+        <div style="display: flex; gap: 10px;">
+            <form method="POST" action="{{ url_for('jobs.approve', job_id=job.id) }}">
+                <button type="submit" class="btn btn-success">✓ Approve</button>
+            </form>
+            <form method="POST" action="{{ url_for('jobs.deny', job_id=job.id) }}">
+                <button type="submit" class="btn btn-secondary">✗ Deny</button>
+            </form>
+            <a href="{{ job.url }}" target="_blank" class="btn btn-primary">View Posting</a>
+            <a href="{{ url_for('jobs.detail', job_id=job.id) }}" class="btn btn-secondary">Details</a>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card">
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <h3>No Jobs Pending Review</h3>
+            <p>All caught up! New jobs will appear here when discovered.</p>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

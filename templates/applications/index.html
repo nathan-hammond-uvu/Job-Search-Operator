@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Applications - Job Search Agent{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h2>Application Tracker</h2>
+    <p>Manage your job applications and their status.</p>
+</div>
+
+{% if applications %}
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Job Title</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Updated</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td><a href="{{ url_for('jobs.detail', job_id=app.job.id) }}">{{ app.job.title }}</a></td>
+                <td>{{ app.job.company }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('applications.update_status', app_id=app.id) }}" style="margin: 0;">
+                        <select name="status" onchange="this.form.submit()">
+                            {% for status in ['NEED_TO_APPLY', 'APPLIED', 'WAITING_FOR_RESPONSE', 'INTERVIEW_REQUESTED', 'DENIED', 'OFFER_SENT'] %}
+                            <option value="{{ status }}" {% if app.status.value == status %}selected{% endif %}>
+                                {{ status.replace('_', ' ').title() }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </td>
+                <td>{{ app.updated_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <a href="{{ url_for('applications.detail', app_id=app.id) }}" class="btn btn-primary btn-small">Details</a>
+                    <a href="{{ url_for('documents.list_documents', job_id=app.job_id) }}" class="btn btn-secondary btn-small">Documents</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <h3>No Applications</h3>
+        <p>Approve jobs to start tracking applications.</p>
+        <p><a href="{{ url_for('jobs.pending') }}" class="btn btn-primary" style="margin-top: 20px;">Review Pending Jobs</a></p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
