@@ -1,9 +1,10 @@
 """User profile blueprint."""
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from sqlalchemy import select
 
 from persistence.database import db
 from persistence.models import UserProfile
+from services.linkedin_scraper import extract_linkedin_profile
 
 bp = Blueprint('profile', __name__)
 
@@ -69,3 +70,31 @@ def edit_profile():
         return redirect(url_for('profile.edit_profile'))
 
     return render_template('profile.html', profile=profile)
+
+
+@bp.route('/profile/import-linkedin', methods=['POST'])
+def import_linkedin():
+    """Import profile data from LinkedIn URL via AJAX."""
+    linkedin_url = request.form.get('linkedin_url', '').strip()
+    
+    if not linkedin_url:
+        return jsonify({'success': False, 'error': 'LinkedIn URL is required'}), 400
+    
+    profile_data = extract_linkedin_profile(linkedin_url)
+    
+    if not profile_data:
+        return jsonify({'success': False, 'error': 'Failed to extract data from LinkedIn URL. Make sure the profile is public.'}), 400
+    
+    return jsonify({
+        'success': True,
+        'data': {
+            'full_name': profile_data.full_name or '',
+            'email': profile_data.email or '',
+            'phone': profile_data.phone or '',
+            'location': profile_data.location or '',
+            'summary': profile_data.summary or '',
+            'experience': profile_data.experience or '',
+            'education': profile_data.education or '',
+            'skills': profile_data.skills or '',
+        }
+    })

@@ -9,6 +9,18 @@
 </div>
 
 <div class="card">
+    <div style="margin-bottom: 30px; padding: 20px; background: #f0f8ff; border-radius: 8px; border-left: 4px solid #3498db;">
+        <h3 style="margin-bottom: 15px;">📋 Import from LinkedIn</h3>
+        <p style="margin-bottom: 15px;">Paste your LinkedIn profile URL to auto-fill your profile information:</p>
+        <div style="display: flex; gap: 10px;">
+            <input id="linkedin_url" type="text" placeholder="https://www.linkedin.com/in/yourprofile/" class="input" style="flex: 1;" />
+            <button id="import_btn" class="btn btn-primary" type="button">Import</button>
+        </div>
+        <div id="import_status" style="margin-top: 10px; display: none;"></div>
+    </div>
+
+    <h3 style="margin-bottom: 20px;">Manual Profile Entry</h3>
+
     <form method="post">
         <div class="form-group">
             <label for="full_name">Full Name *</label>
@@ -75,4 +87,60 @@
         <button class="btn btn-primary" type="submit">Save Profile</button>
     </form>
 </div>
+
+<script>
+document.getElementById('import_btn').addEventListener('click', async function() {
+    const linkedinUrl = document.getElementById('linkedin_url').value.trim();
+    const statusDiv = document.getElementById('import_status');
+    
+    if (!linkedinUrl) {
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'flash flash-error';
+        statusDiv.textContent = 'Please enter a LinkedIn URL';
+        return;
+    }
+    
+    this.disabled = true;
+    this.textContent = 'Importing...';
+    statusDiv.style.display = 'block';
+    statusDiv.className = 'flash flash-info';
+    statusDiv.textContent = 'Importing profile data...';
+    
+    try {
+        const response = await fetch('{{ url_for("profile.import_linkedin") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'linkedin_url=' + encodeURIComponent(linkedinUrl)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Populate form fields
+            document.getElementById('full_name').value = result.data.full_name || '';
+            document.getElementById('email').value = result.data.email || '';
+            document.getElementById('phone').value = result.data.phone || '';
+            document.getElementById('location').value = result.data.location || '';
+            document.getElementById('summary').value = result.data.summary || '';
+            document.getElementById('experience').value = result.data.experience || '';
+            document.getElementById('education').value = result.data.education || '';
+            document.getElementById('skills').value = result.data.skills || '';
+            
+            statusDiv.className = 'flash flash-success';
+            statusDiv.textContent = '✓ Profile data imported successfully! Review and save below.';
+        } else {
+            statusDiv.className = 'flash flash-error';
+            statusDiv.textContent = '✗ ' + result.error;
+        }
+    } catch (error) {
+        statusDiv.className = 'flash flash-error';
+        statusDiv.textContent = '✗ Error importing profile: ' + error.message;
+    } finally {
+        this.disabled = false;
+        this.textContent = 'Import';
+    }
+});
+</script>
 {% endblock %}
