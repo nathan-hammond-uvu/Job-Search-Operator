@@ -153,6 +153,14 @@
             font-size: 1em;
             resize: vertical;
         }
+        .input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 1em;
+        }
         .form-group {
             margin-bottom: 20px;
         }
@@ -196,6 +204,7 @@
                 <a href="{{ url_for('applications.index') }}">Applications</a>
                 <a href="{{ url_for('jobs.recycle_bin') }}">Recycle Bin</a>
                 <a href="{{ url_for('email.index') }}">Email Scanner</a>
+                <a href="{{ url_for('profile.edit_profile') }}">Profile</a>
             </nav>
         </aside>
         <main class="main">

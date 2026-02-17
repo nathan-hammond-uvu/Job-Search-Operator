@@ -49,12 +49,14 @@ def create_app(config_path: str | None = None) -> Flask:
     from blueprints.documents import bp as documents_bp
     from blueprints.applications import bp as applications_bp
     from blueprints.email import bp as email_bp
+    from blueprints.profile import bp as profile_bp
     
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(jobs_bp, url_prefix='/jobs')
     app.register_blueprint(documents_bp, url_prefix='/documents')
     app.register_blueprint(applications_bp, url_prefix='/applications')
     app.register_blueprint(email_bp, url_prefix='/email')
+    app.register_blueprint(profile_bp)
     
     # Create tables
     with app.app_context():

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Job Search Agent{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h2>User Profile</h2>
+    <p>Fill out your profile to enable resume and cover letter generation.</p>
+</div>
+
+<div class="card">
+    <form method="post">
+        <div class="form-group">
+            <label for="full_name">Full Name *</label>
+            <input id="full_name" name="full_name" type="text" required value="{{ profile.full_name if profile else '' }}" class="input" />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email *</label>
+            <input id="email" name="email" type="email" required value="{{ profile.email if profile else '' }}" class="input" />
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="text" value="{{ profile.phone if profile else '' }}" class="input" />
+        </div>
+
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input id="location" name="location" type="text" value="{{ profile.location if profile else '' }}" class="input" />
+        </div>
+
+        <div class="form-group">
+            <label for="summary">Summary</label>
+            <textarea id="summary" name="summary" rows="4">{{ profile.summary if profile else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="experience">Experience</label>
+            <textarea id="experience" name="experience" rows="6">{{ profile.experience if profile else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="education">Education</label>
+            <textarea id="education" name="education" rows="4">{{ profile.education if profile else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="skills">Skills</label>
+            <textarea id="skills" name="skills" rows="4">{{ profile.skills if profile else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="target_roles">Target Roles</label>
+            <textarea id="target_roles" name="target_roles" rows="3">{{ profile.target_roles if profile else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="target_locations">Target Locations</label>
+            <textarea id="target_locations" name="target_locations" rows="3">{{ profile.target_locations if profile else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="salary_min">Minimum Salary</label>
+            <input id="salary_min" name="salary_min" type="number" min="0" step="1000" value="{{ profile.salary_min if profile and profile.salary_min is not none else '' }}" class="input" />
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input name="remote_only" type="checkbox" {% if profile and profile.remote_only %}checked{% endif %} />
+                Remote Only
+            </label>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Save Profile</button>
+    </form>
+</div>
+{% endblock %}
