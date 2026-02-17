@@ -1,5 +1,11 @@
-Flask==3.0.0
+Flask==3.1.0
 Flask-SQLAlchemy==3.1.1
-SQLAlchemy==2.0.23
-requests==2.31.0
-python-dotenv==1.0.0
+SQLAlchemy==2.0.36
+requests==2.32.3
+python-dotenv==1.0.1
+
+# Flask==3.0.0
+# Flask-SQLAlchemy==3.1.1
+# SQLAlchemy==2.0.23
+# requests==2.31.0
+# python-dotenv==1.0.0
